@@ -1,0 +1,15 @@
+# Web API
+fastapi>=0.143,<1
+uvicorn[standard]>=0.54
+pydantic>=2.14,<3
+pydantic-settings>=2.16,<3
+python-multipart>=0.0.32
+
+# The model (versions the notebooks were run with). torch-geometric needs a matching torch build:
+# see https://pytorch-geometric.readthedocs.io/en/latest/install/installation.html
+torch==2.14.0
+torch-geometric==2.8.0.post1
+numpy==2.4.6
+pandas==3.0.3
+scipy==1.17.1
+pyproj==3.8.0

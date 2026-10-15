@@ -1,0 +1,22 @@
+[project]
+name = "poi-location-api"
+version = "1.0.0"
+description = "FastAPI backend serving the dual-mode GNN business-location model for Lesotho"
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-m 'not slow'"
+markers = ["slow: full parity checks against the notebook outputs (run with: pytest -m slow)"]
+filterwarnings = ["ignore::DeprecationWarning:torch_geometric.*"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E731", "N803", "N806"]
+
+[tool.ruff.lint.per-file-ignores]
+"app/ml/*" = ["E501", "B905"]    # ported unchanged from predict_poi.py

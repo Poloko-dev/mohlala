@@ -1,0 +1,5 @@
+-r requirements.txt
+pytest>=9.1
+httpx2>=2.13          # starlette.testclient transport
+scikit-learn==1.9.1    # the parity tests compare macro-F1 with the notebook
+ruff>=0.17

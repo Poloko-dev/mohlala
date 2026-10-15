@@ -1,0 +1,2093 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Lesotho POI location intelligence",
+    "description": "Business location intelligence for Lesotho from a dual-mode GraphSAGE trained on OpenStreetMap points of interest. Data \u00a9 OpenStreetMap contributors (ODbL 1.0).",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/v1/health": {
+      "get": {
+        "tags": [
+          "model"
+        ],
+        "summary": "Health",
+        "operationId": "health_api_v1_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Health Api V1 Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/model": {
+      "get": {
+        "tags": [
+          "model"
+        ],
+        "summary": "Model description and evaluation (RO1, RO2, RO4 tables of metrics.json)",
+        "operationId": "model_api_v1_model_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/predictions/site": {
+      "post": {
+        "tags": [
+          "predictions"
+        ],
+        "summary": "What a candidate location suits (site mode: location and neighbourhood only)",
+        "operationId": "predict_site_api_v1_predictions_site_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SiteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Prediction"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/predictions/new-poi": {
+      "post": {
+        "tags": [
+          "predictions"
+        ],
+        "summary": "A POI described as it would be mapped (known mode)",
+        "operationId": "predict_new_poi_api_v1_predictions_new_poi_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewPoiRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Prediction"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/suggestions": {
+      "post": {
+        "tags": [
+          "suggestions"
+        ],
+        "summary": "Start ranking a grid of candidate sites around a location for one category (site mode)",
+        "operationId": "create_suggestion_api_v1_suggestions_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SuggestRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuggestJob"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/suggestions/{job_id}": {
+      "get": {
+        "tags": [
+          "suggestions"
+        ],
+        "summary": "Progress and, when finished, the ranked candidate sites",
+        "operationId": "get_suggestion_api_v1_suggestions__job_id__get",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuggestJob"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/areas": {
+      "get": {
+        "tags": [
+          "areas and market gaps"
+        ],
+        "summary": "Sub-districts with their district and the mean position of their POIs",
+        "operationId": "list_areas_api_v1_areas_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Area"
+                  },
+                  "type": "array",
+                  "title": "Response List Areas Api V1 Areas Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/market-gaps": {
+      "get": {
+        "tags": [
+          "areas and market gaps"
+        ],
+        "summary": "Expected against observed POIs per sub-district and category (RO3)",
+        "operationId": "market_gaps_api_v1_market_gaps_get",
+        "parameters": [
+          {
+            "name": "area",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 100
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Part of a sub-district or district name, or a code such as LSA12",
+              "title": "Area"
+            },
+            "description": "Part of a sub-district or district name, or a code such as LSA12"
+          },
+          {
+            "name": "adm2_pcode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 10
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Adm2 Pcode"
+            }
+          },
+          {
+            "name": "flagged_only",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Only the rows flagged as a gap or a cluster",
+              "default": true,
+              "title": "Flagged Only"
+            },
+            "description": "Only the rows flagged as a gap or a cluster"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GapRow"
+                  },
+                  "title": "Response Market Gaps Api V1 Market Gaps Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/pois": {
+      "get": {
+        "tags": [
+          "existing POIs"
+        ],
+        "summary": "Every mapped POI, for the map",
+        "operationId": "list_pois_api_v1_pois_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PoiPoint"
+                  },
+                  "type": "array",
+                  "title": "Response List Pois Api V1 Pois Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/pois/search": {
+      "get": {
+        "tags": [
+          "existing POIs"
+        ],
+        "summary": "Find POIs by node_id, OSM id (node/123, way/456) or part of a name",
+        "operationId": "search_api_v1_pois_search_get",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "title": "Q"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PoiSummary"
+                  },
+                  "title": "Response Search Api V1 Pois Search Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/pois/{node_id}": {
+      "get": {
+        "tags": [
+          "existing POIs"
+        ],
+        "summary": "Get Poi",
+        "operationId": "get_poi_api_v1_pois__node_id__get",
+        "parameters": [
+          {
+            "name": "node_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "node_id of the POI (row of processed_poi.csv)",
+              "title": "Node Id"
+            },
+            "description": "node_id of the POI (row of processed_poi.csv)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PoiSummary"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/pois/{node_id}/prediction": {
+      "get": {
+        "tags": [
+          "existing POIs"
+        ],
+        "summary": "The notebook's predictions for a mapped POI in both modes (out-of-fold for labelled POIs)",
+        "operationId": "get_prediction_api_v1_pois__node_id__prediction_get",
+        "parameters": [
+          {
+            "name": "node_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "node_id of the POI (row of processed_poi.csv)",
+              "title": "Node Id"
+            },
+            "description": "node_id of the POI (row of processed_poi.csv)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Prediction"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/batch": {
+      "post": {
+        "tags": [
+          "batch"
+        ],
+        "summary": "Start scoring every row of a CSV",
+        "operationId": "create_batch_api_v1_batch_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_create_batch_api_v1_batch_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchJob"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/batch/{job_id}": {
+      "get": {
+        "tags": [
+          "batch"
+        ],
+        "summary": "Progress and, when finished, the prediction of every row",
+        "operationId": "get_batch_api_v1_batch__job_id__get",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchJob"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/batch/{job_id}/csv": {
+      "get": {
+        "tags": [
+          "batch"
+        ],
+        "summary": "The input CSV with the predictions appended",
+        "operationId": "download_batch_api_v1_batch__job_id__csv_get",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/csv": {}
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Area": {
+        "properties": {
+          "adm2_pcode": {
+            "type": "string",
+            "title": "Adm2 Pcode"
+          },
+          "sub_district": {
+            "type": "string",
+            "title": "Sub District"
+          },
+          "adm1_pcode": {
+            "type": "string",
+            "title": "Adm1 Pcode"
+          },
+          "district": {
+            "type": "string",
+            "title": "District"
+          },
+          "lat": {
+            "type": "number",
+            "title": "Lat"
+          },
+          "lon": {
+            "type": "number",
+            "title": "Lon"
+          },
+          "pois": {
+            "type": "integer",
+            "title": "Pois"
+          }
+        },
+        "type": "object",
+        "required": [
+          "adm2_pcode",
+          "sub_district",
+          "adm1_pcode",
+          "district",
+          "lat",
+          "lon",
+          "pois"
+        ],
+        "title": "Area",
+        "description": "A sub-district, placed at the mean position of its mapped POIs (the data has no boundary polygons)."
+      },
+      "BatchJob": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "running",
+              "succeeded",
+              "failed"
+            ],
+            "title": "Status"
+          },
+          "progress": {
+            "$ref": "#/components/schemas/JobProgress"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BatchResult"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "status",
+          "progress",
+          "error",
+          "created_at",
+          "finished_at",
+          "result"
+        ],
+        "title": "BatchJob"
+      },
+      "BatchResult": {
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "site",
+              "known"
+            ],
+            "title": "Mode"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/BatchRow"
+            },
+            "type": "array",
+            "title": "Rows"
+          },
+          "scored": {
+            "type": "integer",
+            "title": "Scored"
+          },
+          "failed": {
+            "type": "integer",
+            "title": "Failed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mode",
+          "rows",
+          "scored",
+          "failed"
+        ],
+        "title": "BatchResult"
+      },
+      "BatchRow": {
+        "properties": {
+          "row": {
+            "type": "integer",
+            "title": "Row"
+          },
+          "lat": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lat"
+          },
+          "lon": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lon"
+          },
+          "pred_category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pred Category"
+          },
+          "pred_prob": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pred Prob"
+          },
+          "top3": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Top3",
+            "default": []
+          },
+          "probabilities": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Probabilities",
+            "default": {}
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          }
+        },
+        "type": "object",
+        "required": [
+          "row",
+          "lat",
+          "lon",
+          "pred_category",
+          "pred_prob",
+          "top3",
+          "probabilities",
+          "error"
+        ],
+        "title": "BatchRow"
+      },
+      "Body_create_batch_api_v1_batch_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "description": "CSV with lat and lon columns"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "site",
+              "known"
+            ],
+            "title": "Mode",
+            "description": "site: rows are candidate sites; known: rows describe mapped POIs (has_name, has_address, ...)",
+            "default": "site"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_create_batch_api_v1_batch_post"
+      },
+      "CategoryScore": {
+        "properties": {
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "probability": {
+            "type": "number",
+            "title": "Probability"
+          },
+          "test_f1": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Test F1",
+            "description": "Out-of-fold F1 of this category in this mode"
+          },
+          "test_top3": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Test Top3",
+            "description": "Share of this category's POIs with it among the 3 most likely"
+          }
+        },
+        "type": "object",
+        "required": [
+          "category",
+          "probability",
+          "test_f1",
+          "test_top3"
+        ],
+        "title": "CategoryScore"
+      },
+      "ClassMetrics": {
+        "properties": {
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "precision": {
+            "type": "number",
+            "title": "Precision"
+          },
+          "recall": {
+            "type": "number",
+            "title": "Recall"
+          },
+          "f1": {
+            "type": "number",
+            "title": "F1"
+          },
+          "top3": {
+            "type": "number",
+            "title": "Top3"
+          }
+        },
+        "type": "object",
+        "required": [
+          "category",
+          "precision",
+          "recall",
+          "f1",
+          "top3"
+        ],
+        "title": "ClassMetrics"
+      },
+      "FeatureImportance": {
+        "properties": {
+          "unit": {
+            "type": "string",
+            "title": "Unit",
+            "description": "A feature, or a group of features ('group: loc_')"
+          },
+          "d_log_loss": {
+            "type": "number",
+            "title": "D Log Loss",
+            "description": "Rise in log loss when the unit is shuffled"
+          },
+          "sd": {
+            "type": "number",
+            "title": "Sd"
+          },
+          "d_f1": {
+            "type": "number",
+            "title": "D F1"
+          }
+        },
+        "type": "object",
+        "required": [
+          "unit",
+          "d_log_loss",
+          "sd",
+          "d_f1"
+        ],
+        "title": "FeatureImportance"
+      },
+      "GapRow": {
+        "properties": {
+          "adm1_name": {
+            "type": "string",
+            "title": "Adm1 Name"
+          },
+          "adm2_name": {
+            "type": "string",
+            "title": "Adm2 Name"
+          },
+          "adm2_pcode": {
+            "type": "string",
+            "title": "Adm2 Pcode"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "pois": {
+            "type": "integer",
+            "title": "Pois",
+            "description": "Labelled POIs in the sub-district"
+          },
+          "observed": {
+            "type": "integer",
+            "title": "Observed",
+            "description": "POIs of this category mapped in the sub-district"
+          },
+          "expected": {
+            "type": "number",
+            "title": "Expected",
+            "description": "Sum of the POIs' prior-corrected site-mode probabilities for this category"
+          },
+          "gap": {
+            "type": "number",
+            "title": "Gap",
+            "description": "expected - observed: positive when the locations suggest more than is mapped"
+          },
+          "z": {
+            "type": "number",
+            "title": "Z",
+            "description": "gap divided by sqrt(sum p(1 - p))"
+          },
+          "signal": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "gap",
+                  "cluster"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Signal",
+            "description": "gap: z >= 2 and gap >= 2; cluster: z <= -2 and gap <= -2 (sub-districts with >= 20 POIs only)"
+          },
+          "mapping": {
+            "anyOf": [
+              {
+                "type": "string",
+                "const": "thin"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mapping",
+            "description": "thin: mapping quality in the lowest quarter of sub-districts, so a gap may be missing data"
+          }
+        },
+        "type": "object",
+        "required": [
+          "adm1_name",
+          "adm2_name",
+          "adm2_pcode",
+          "category",
+          "pois",
+          "observed",
+          "expected",
+          "gap",
+          "z",
+          "signal",
+          "mapping"
+        ],
+        "title": "GapRow",
+        "description": "One row of market_gaps.csv: expected against observed POIs of a category in a sub-district."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "JobProgress": {
+        "properties": {
+          "done": {
+            "type": "integer",
+            "title": "Done"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "done",
+          "total"
+        ],
+        "title": "JobProgress"
+      },
+      "LocationContext": {
+        "properties": {
+          "district": {
+            "type": "string",
+            "title": "District"
+          },
+          "sub_district": {
+            "type": "string",
+            "title": "Sub District"
+          },
+          "adm2_pcode": {
+            "type": "string",
+            "title": "Adm2 Pcode"
+          },
+          "nearest_town": {
+            "type": "string",
+            "title": "Nearest Town"
+          },
+          "dist_town_km": {
+            "type": "number",
+            "title": "Dist Town Km"
+          },
+          "pois_500m": {
+            "type": "integer",
+            "title": "Pois 500M"
+          },
+          "pois_2km": {
+            "type": "integer",
+            "title": "Pois 2Km"
+          },
+          "urban": {
+            "type": "boolean",
+            "title": "Urban"
+          },
+          "neighbours": {
+            "items": {
+              "$ref": "#/components/schemas/Neighbour"
+            },
+            "type": "array",
+            "title": "Neighbours",
+            "description": "The 8 nearest mapped POIs, the node's neighbours in the graph"
+          }
+        },
+        "type": "object",
+        "required": [
+          "district",
+          "sub_district",
+          "adm2_pcode",
+          "nearest_town",
+          "dist_town_km",
+          "pois_500m",
+          "pois_2km",
+          "urban",
+          "neighbours"
+        ],
+        "title": "LocationContext"
+      },
+      "ModePrediction": {
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "site",
+              "known"
+            ],
+            "title": "Mode"
+          },
+          "scores": {
+            "items": {
+              "$ref": "#/components/schemas/CategoryScore"
+            },
+            "type": "array",
+            "title": "Scores",
+            "description": "Every category, most likely first"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mode",
+          "scores"
+        ],
+        "title": "ModePrediction"
+      },
+      "ModeSummary": {
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "site",
+              "known"
+            ],
+            "title": "Mode"
+          },
+          "macro_f1": {
+            "type": "number",
+            "title": "Macro F1",
+            "description": "Test macro-F1, mean over the 5 spatial folds"
+          },
+          "macro_f1_sd": {
+            "type": "number",
+            "title": "Macro F1 Sd",
+            "description": "SD of the test macro-F1 over the folds"
+          },
+          "accuracy": {
+            "type": "number",
+            "title": "Accuracy"
+          },
+          "top2": {
+            "type": "number",
+            "title": "Top2"
+          },
+          "top3": {
+            "type": "number",
+            "title": "Top3"
+          },
+          "ece": {
+            "type": "number",
+            "title": "Ece",
+            "description": "Expected calibration error after temperature scaling"
+          },
+          "log_loss": {
+            "type": "number",
+            "title": "Log Loss"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mode",
+          "macro_f1",
+          "macro_f1_sd",
+          "accuracy",
+          "top2",
+          "top3",
+          "ece",
+          "log_loss"
+        ],
+        "title": "ModeSummary"
+      },
+      "ModelInfo": {
+        "properties": {
+          "architecture": {
+            "type": "string",
+            "title": "Architecture"
+          },
+          "n_models": {
+            "type": "integer",
+            "title": "N Models"
+          },
+          "n_features": {
+            "type": "integer",
+            "title": "N Features"
+          },
+          "n_pois": {
+            "type": "integer",
+            "title": "N Pois"
+          },
+          "n_labelled": {
+            "type": "integer",
+            "title": "N Labelled"
+          },
+          "categories": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Categories"
+          },
+          "own_attributes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Own Attributes",
+            "description": "Inputs hidden in site mode: how the POI itself is mapped"
+          },
+          "config": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Config"
+          },
+          "summary": {
+            "items": {
+              "$ref": "#/components/schemas/ModeSummary"
+            },
+            "type": "array",
+            "title": "Summary"
+          },
+          "per_class": {
+            "additionalProperties": {
+              "items": {
+                "$ref": "#/components/schemas/ClassMetrics"
+              },
+              "type": "array"
+            },
+            "propertyNames": {
+              "enum": [
+                "site",
+                "known"
+              ]
+            },
+            "type": "object",
+            "title": "Per Class"
+          },
+          "per_fold": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Per Fold"
+          },
+          "architecture_comparison": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Architecture Comparison"
+          },
+          "ablations": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Ablations"
+          },
+          "permutation_importance": {
+            "items": {
+              "$ref": "#/components/schemas/FeatureImportance"
+            },
+            "type": "array",
+            "title": "Permutation Importance"
+          },
+          "neighbour_influence": {
+            "$ref": "#/components/schemas/NeighbourInfluence"
+          },
+          "site_f1_deployment": {
+            "type": "number",
+            "title": "Site F1 Deployment"
+          },
+          "prior_factors": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Prior Factors"
+          }
+        },
+        "type": "object",
+        "required": [
+          "architecture",
+          "n_models",
+          "n_features",
+          "n_pois",
+          "n_labelled",
+          "categories",
+          "own_attributes",
+          "config",
+          "summary",
+          "per_class",
+          "per_fold",
+          "architecture_comparison",
+          "ablations",
+          "permutation_importance",
+          "neighbour_influence",
+          "site_f1_deployment",
+          "prior_factors"
+        ],
+        "title": "ModelInfo"
+      },
+      "Neighbour": {
+        "properties": {
+          "node_id": {
+            "type": "integer",
+            "title": "Node Id"
+          },
+          "lat": {
+            "type": "number",
+            "title": "Lat"
+          },
+          "lon": {
+            "type": "number",
+            "title": "Lon"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category",
+            "description": "Mapped category; 'Uncategorized' for the 131 unlabelled POIs"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "distance_m": {
+            "type": "number",
+            "title": "Distance M"
+          }
+        },
+        "type": "object",
+        "required": [
+          "node_id",
+          "lat",
+          "lon",
+          "category",
+          "name",
+          "distance_m"
+        ],
+        "title": "Neighbour"
+      },
+      "NeighbourInfluence": {
+        "properties": {
+          "neighbour_categories": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Neighbour Categories"
+          },
+          "predicted_categories": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Predicted Categories"
+          },
+          "values_pp": {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Values Pp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "neighbour_categories",
+          "predicted_categories",
+          "values_pp"
+        ],
+        "title": "NeighbourInfluence",
+        "description": "Change in each predicted probability (percentage points) when the categories of all neighbours of one type\nare hidden, for held-out nodes with such a neighbour (site mode)."
+      },
+      "NewPoiRequest": {
+        "properties": {
+          "lat": {
+            "type": "number",
+            "maximum": 90.0,
+            "minimum": -90.0,
+            "title": "Lat",
+            "description": "WGS 84 latitude; must lie inside Lesotho",
+            "examples": [
+              -29.3151
+            ]
+          },
+          "lon": {
+            "type": "number",
+            "maximum": 180.0,
+            "minimum": -180.0,
+            "title": "Lon",
+            "description": "WGS 84 longitude; must lie inside Lesotho",
+            "examples": [
+              27.4869
+            ]
+          },
+          "has_name": {
+            "type": "boolean",
+            "title": "Has Name",
+            "default": false
+          },
+          "has_address": {
+            "type": "boolean",
+            "title": "Has Address",
+            "default": false
+          },
+          "has_hours": {
+            "type": "boolean",
+            "title": "Has Hours",
+            "description": "Opening hours are mapped",
+            "default": false
+          },
+          "footprint_m2": {
+            "type": "number",
+            "maximum": 1000000.0,
+            "minimum": 0.0,
+            "title": "Footprint M2",
+            "description": "Building outline area; 0 = mapped as a point",
+            "default": 0.0
+          },
+          "also_point": {
+            "type": "boolean",
+            "title": "Also Point",
+            "description": "Mapped as a point as well as an outline",
+            "default": false
+          },
+          "osm_id_rank": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Osm Id Rank",
+            "description": "0-1 mapping-date rank; default: that of its surroundings"
+          },
+          "adm2_pcode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Adm2 Pcode",
+            "description": "Sub-district P-code such as LSA12; default: that of the nearest mapped POI",
+            "examples": [
+              "LSA12"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "lat",
+          "lon"
+        ],
+        "title": "NewPoiRequest",
+        "description": "A POI described as it would be mapped in OpenStreetMap."
+      },
+      "PoiPoint": {
+        "properties": {
+          "node_id": {
+            "type": "integer",
+            "title": "Node Id"
+          },
+          "lat": {
+            "type": "number",
+            "title": "Lat"
+          },
+          "lon": {
+            "type": "number",
+            "title": "Lon"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category",
+            "description": "Mapped category; 'Uncategorized' for the 131 unlabelled POIs"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "node_id",
+          "lat",
+          "lon",
+          "category",
+          "name"
+        ],
+        "title": "PoiPoint"
+      },
+      "PoiSummary": {
+        "properties": {
+          "node_id": {
+            "type": "integer",
+            "title": "Node Id"
+          },
+          "lat": {
+            "type": "number",
+            "title": "Lat"
+          },
+          "lon": {
+            "type": "number",
+            "title": "Lon"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category",
+            "description": "Mapped category; 'Uncategorized' for the 131 unlabelled POIs"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "osm_id": {
+            "type": "string",
+            "title": "Osm Id"
+          },
+          "tag": {
+            "type": "string",
+            "title": "Tag",
+            "description": "The OSM tag the POI was mapped with, e.g. amenity=school"
+          },
+          "district": {
+            "type": "string",
+            "title": "District"
+          },
+          "sub_district": {
+            "type": "string",
+            "title": "Sub District"
+          },
+          "adm2_pcode": {
+            "type": "string",
+            "title": "Adm2 Pcode"
+          },
+          "labelled": {
+            "type": "boolean",
+            "title": "Labelled"
+          }
+        },
+        "type": "object",
+        "required": [
+          "node_id",
+          "lat",
+          "lon",
+          "category",
+          "name",
+          "osm_id",
+          "tag",
+          "district",
+          "sub_district",
+          "adm2_pcode",
+          "labelled"
+        ],
+        "title": "PoiSummary"
+      },
+      "Prediction": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "lat": {
+            "type": "number",
+            "title": "Lat"
+          },
+          "lon": {
+            "type": "number",
+            "title": "Lon"
+          },
+          "predictions": {
+            "items": {
+              "$ref": "#/components/schemas/ModePrediction"
+            },
+            "type": "array",
+            "title": "Predictions"
+          },
+          "true_category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "True Category",
+            "description": "The mapped category, for an existing labelled POI"
+          },
+          "note": {
+            "type": "string",
+            "title": "Note"
+          },
+          "context": {
+            "$ref": "#/components/schemas/LocationContext"
+          },
+          "market_signals": {
+            "items": {
+              "$ref": "#/components/schemas/GapRow"
+            },
+            "type": "array",
+            "title": "Market Signals",
+            "description": "Flagged gaps and clusters of the sub-district"
+          },
+          "poi": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PoiSummary"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The existing POI, when one was looked up"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "lat",
+          "lon",
+          "predictions",
+          "true_category",
+          "note",
+          "context",
+          "market_signals",
+          "poi"
+        ],
+        "title": "Prediction"
+      },
+      "SiteRequest": {
+        "properties": {
+          "lat": {
+            "type": "number",
+            "maximum": 90.0,
+            "minimum": -90.0,
+            "title": "Lat",
+            "description": "WGS 84 latitude; must lie inside Lesotho",
+            "examples": [
+              -29.3151
+            ]
+          },
+          "lon": {
+            "type": "number",
+            "maximum": 180.0,
+            "minimum": -180.0,
+            "title": "Lon",
+            "description": "WGS 84 longitude; must lie inside Lesotho",
+            "examples": [
+              27.4869
+            ]
+          },
+          "adm2_pcode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Adm2 Pcode",
+            "description": "Sub-district P-code such as LSA12; default: that of the nearest mapped POI",
+            "examples": [
+              "LSA12"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "lat",
+          "lon"
+        ],
+        "title": "SiteRequest"
+      },
+      "SuggestJob": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "running",
+              "succeeded",
+              "failed"
+            ],
+            "title": "Status"
+          },
+          "progress": {
+            "$ref": "#/components/schemas/JobProgress"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SuggestResult"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "status",
+          "progress",
+          "error",
+          "created_at",
+          "finished_at",
+          "result"
+        ],
+        "title": "SuggestJob"
+      },
+      "SuggestRequest": {
+        "properties": {
+          "category": {
+            "type": "string",
+            "title": "Category",
+            "examples": [
+              "Retail"
+            ]
+          },
+          "lat": {
+            "type": "number",
+            "maximum": 90.0,
+            "minimum": -90.0,
+            "title": "Lat",
+            "description": "WGS 84 latitude; must lie inside Lesotho",
+            "examples": [
+              -29.3151
+            ]
+          },
+          "lon": {
+            "type": "number",
+            "maximum": 180.0,
+            "minimum": -180.0,
+            "title": "Lon",
+            "description": "WGS 84 longitude; must lie inside Lesotho",
+            "examples": [
+              27.4869
+            ]
+          },
+          "radius_km": {
+            "type": "number",
+            "maximum": 10.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Radius Km",
+            "default": 2.0
+          },
+          "step_m": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 5000.0,
+                "minimum": 50.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Step M",
+            "description": "Grid spacing; default: about 49 points in the circle"
+          }
+        },
+        "type": "object",
+        "required": [
+          "category",
+          "lat",
+          "lon"
+        ],
+        "title": "SuggestRequest"
+      },
+      "SuggestResult": {
+        "properties": {
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "lat": {
+            "type": "number",
+            "title": "Lat"
+          },
+          "lon": {
+            "type": "number",
+            "title": "Lon"
+          },
+          "radius_km": {
+            "type": "number",
+            "title": "Radius Km"
+          },
+          "step_m": {
+            "type": "number",
+            "title": "Step M"
+          },
+          "sites": {
+            "items": {
+              "$ref": "#/components/schemas/SuggestedSite"
+            },
+            "type": "array",
+            "title": "Sites",
+            "description": "Every scored candidate site, best first"
+          },
+          "category_test_f1": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category Test F1"
+          },
+          "category_test_top3": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category Test Top3"
+          }
+        },
+        "type": "object",
+        "required": [
+          "category",
+          "lat",
+          "lon",
+          "radius_km",
+          "step_m",
+          "sites",
+          "category_test_f1",
+          "category_test_top3"
+        ],
+        "title": "SuggestResult"
+      },
+      "SuggestedSite": {
+        "properties": {
+          "lat": {
+            "type": "number",
+            "title": "Lat"
+          },
+          "lon": {
+            "type": "number",
+            "title": "Lon"
+          },
+          "probability": {
+            "type": "number",
+            "title": "Probability",
+            "description": "Site-mode probability of the requested category"
+          },
+          "class_rank": {
+            "type": "integer",
+            "title": "Class Rank",
+            "description": "Rank of the requested category among all categories at this site"
+          },
+          "most_likely": {
+            "type": "string",
+            "title": "Most Likely"
+          },
+          "category_within_1km": {
+            "type": "integer",
+            "title": "Category Within 1Km",
+            "description": "POIs of the requested category already mapped within 1 km"
+          },
+          "pois_within_1km": {
+            "type": "integer",
+            "title": "Pois Within 1Km"
+          },
+          "town": {
+            "type": "string",
+            "title": "Town"
+          },
+          "town_km": {
+            "type": "number",
+            "title": "Town Km"
+          },
+          "adm2_pcode": {
+            "type": "string",
+            "title": "Adm2 Pcode"
+          }
+        },
+        "type": "object",
+        "required": [
+          "lat",
+          "lon",
+          "probability",
+          "class_rank",
+          "most_likely",
+          "category_within_1km",
+          "pois_within_1km",
+          "town",
+          "town_km",
+          "adm2_pcode"
+        ],
+        "title": "SuggestedSite"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
